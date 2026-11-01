@@ -1,0 +1,6 @@
+{
+  "name": "Bikyn Desain & Percetakan",
+  "description": "Website katalog layanan percetakan & desain kreatif rumahan dengan kalkulator pesanan WhatsApp dan sistem manajemen konten (CMS).",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
