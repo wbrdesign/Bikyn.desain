@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Service, StudioConfig, ServiceCategory } from './types';
-import { DEFAULT_SERVICES, DEFAULT_CONFIG } from './data/defaultData';
-import { Navbar } from './components/Navbar';
-import { ServiceCard } from './components/ServiceCard';
-import { WhatsAppCalculator } from './components/WhatsAppCalculator';
-import { ServiceDetailModal } from './components/ServiceDetailModal';
-import { ServicePoints } from './components/ServicePoints';
-import { CMSModal } from './components/CMSModal';
-import { AIAssistantModal } from './components/AIAssistantModal';
-import { Footer } from './components/Footer';
+import { Service, StudioConfig, ServiceCategory } from './types.ts';
+import { DEFAULT_SERVICES, DEFAULT_CONFIG } from './data/defaultData.ts';
+import { Navbar } from './components/Navbar.tsx';
+import { ServiceCard } from './components/ServiceCard.tsx';
+import { WhatsAppCalculator } from './components/WhatsAppCalculator.tsx';
+import { ServiceDetailModal } from './components/ServiceDetailModal.tsx';
+import { ServicePoints } from './components/ServicePoints.tsx';
+import { CMSModal } from './components/CMSModal.tsx';
+import { AIAssistantModal } from './components/AIAssistantModal.tsx';
+import { Footer } from './components/Footer.tsx';
 import {
   Search,
   Settings,
