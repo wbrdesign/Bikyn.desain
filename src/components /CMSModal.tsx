@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Service, StudioConfig, ServiceCategory } from '../types';
+import { DEFAULT_SERVICES, DEFAULT_CONFIG } from '../data/defaultData';
 import { ServiceMockup } from './ServiceMockup';
 import {
   X,
@@ -42,15 +43,20 @@ export const CMSModal: React.FC<CMSModalProps> = ({
   onUpdateStudioConfig,
   onResetDefaults,
 }) => {
-  // Semua state React diletakkan di paling atas (Rules of Hooks)
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [passwordInput, setPasswordInput] = useState<string>('');
   const [authError, setAuthError] = useState<string>('');
 
   const [activeTab, setActiveTab] = useState<'services' | 'profile' | 'export'>('services');
-  const [selectedServiceId, setSelectedServiceId] = useState<string>(services[0]?.id || '');
-  const [localServices, setLocalServices] = useState<Service[]>(services);
-  const [localConfig, setLocalConfig] = useState<StudioConfig>(studioConfig);
+  const [selectedServiceId, setSelectedServiceId] = useState<string>(
+    (services && services[0]?.id) || DEFAULT_SERVICES[0].id
+  );
+  const [localServices, setLocalServices] = useState<Service[]>(
+    Array.isArray(services) && services.length > 0 ? services : DEFAULT_SERVICES
+  );
+  const [localConfig, setLocalConfig] = useState<StudioConfig>(
+    studioConfig && studioConfig.whatsappNumber ? studioConfig : DEFAULT_CONFIG
+  );
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
@@ -61,12 +67,12 @@ export const CMSModal: React.FC<CMSModalProps> = ({
 
   const handleAuthSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (passwordInput === 'Bismillah1234') {
+    if (passwordInput.trim() === 'Bismillah1234') {
       setIsAuthenticated(true);
       setAuthError('');
       setPasswordInput('');
     } else {
-      setAuthError('Kata sandi salah. Silakan coba lagi.');
+      setAuthError('Kata sandi salah. Silakan coba lagi (Bismillah1234).');
       setPasswordInput('');
     }
   };
@@ -191,7 +197,10 @@ export const CMSModal: React.FC<CMSModalProps> = ({
     }
   };
 
-  const currentService = localServices.find((s) => s.id === selectedServiceId) || localServices[0];
+  const currentService =
+    (localServices && localServices.find((s) => s.id === selectedServiceId)) ||
+    (localServices && localServices[0]) ||
+    DEFAULT_SERVICES[0];
 
   const handleServiceChange = (field: keyof Service, value: any) => {
     if (!currentService) return;
@@ -303,9 +312,9 @@ export const CMSModal: React.FC<CMSModalProps> = ({
     reader.readAsText(file);
   };
 
-  const filteredServices = localServices.filter((s) =>
-    s.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    s.category.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredServices = (localServices || []).filter((s) =>
+    (s?.title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (s?.category || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -329,7 +338,7 @@ export const CMSModal: React.FC<CMSModalProps> = ({
                   GitHub & Vercel Ready
                 </span>
               </div>
-              <p className="text-xs text-orange-100">
+              <p className="text-xs text-zinc-400">
                 Ubah foto layanan, harga, teks hero, dan informasi studio secara mudah & cepat
               </p>
             </div>
@@ -339,7 +348,7 @@ export const CMSModal: React.FC<CMSModalProps> = ({
             <button
               type="button"
               onClick={handleSaveAll}
-              className="flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl bg-white/20 hover:bg-white/30 text-white font-bold text-xs sm:text-sm shadow-md transition-all cursor-pointer backdrop-blur-xs border border-white/20"
+              className="flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs sm:text-sm shadow-md transition-all cursor-pointer"
             >
               {saveSuccess ? (
                 <>
@@ -357,17 +366,17 @@ export const CMSModal: React.FC<CMSModalProps> = ({
             <button
               type="button"
               onClick={handleLogout}
-              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-xl bg-black/20 hover:bg-black/30 text-white text-xs font-semibold transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white text-xs font-semibold transition-colors cursor-pointer"
               title="Kunci CMS (Keluar sesi admin)"
             >
-              <LogOut className="w-3.5 h-3.5 text-white" />
+              <LogOut className="w-3.5 h-3.5 text-zinc-400" />
               <span className="hidden sm:inline">Kunci CMS</span>
             </button>
 
             <button
               type="button"
               onClick={onClose}
-              className="p-2 rounded-full text-white hover:bg-white/20 transition-colors cursor-pointer"
+              className="p-2 rounded-full text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -379,9 +388,9 @@ export const CMSModal: React.FC<CMSModalProps> = ({
           <button
             type="button"
             onClick={() => setActiveTab('services')}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl transition-all whitespace-nowrap cursor-pointer ${
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl transition-all whitespace-nowrap ${
               activeTab === 'services'
-                ? 'bg-white text-zinc-950 shadow-xs border border-zinc-200 font-bold'
+                ? 'bg-white text-zinc-950 shadow-xs border border-zinc-200'
                 : 'hover:text-zinc-900'
             }`}
           >
@@ -392,9 +401,9 @@ export const CMSModal: React.FC<CMSModalProps> = ({
           <button
             type="button"
             onClick={() => setActiveTab('profile')}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl transition-all whitespace-nowrap cursor-pointer ${
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl transition-all whitespace-nowrap ${
               activeTab === 'profile'
-                ? 'bg-white text-zinc-950 shadow-xs border border-zinc-200 font-bold'
+                ? 'bg-white text-zinc-950 shadow-xs border border-zinc-200'
                 : 'hover:text-zinc-900'
             }`}
           >
@@ -405,9 +414,9 @@ export const CMSModal: React.FC<CMSModalProps> = ({
           <button
             type="button"
             onClick={() => setActiveTab('export')}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl transition-all whitespace-nowrap cursor-pointer ${
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl transition-all whitespace-nowrap ${
               activeTab === 'export'
-                ? 'bg-white text-zinc-950 shadow-xs border border-zinc-200 font-bold'
+                ? 'bg-white text-zinc-950 shadow-xs border border-zinc-200'
                 : 'hover:text-zinc-900'
             }`}
           >
@@ -433,7 +442,7 @@ export const CMSModal: React.FC<CMSModalProps> = ({
                   <button
                     type="button"
                     onClick={handleAddNewService}
-                    className="flex items-center gap-1 px-2.5 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-lg text-xs font-bold transition-colors shrink-0 cursor-pointer"
+                    className="flex items-center gap-1 px-2.5 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-lg text-xs font-bold transition-colors shrink-0"
                     title="Tambah layanan baru"
                   >
                     <Plus className="w-3.5 h-3.5" />
@@ -449,376 +458,460 @@ export const CMSModal: React.FC<CMSModalProps> = ({
                     <div
                       key={svc.id}
                       onClick={() => setSelectedServiceId(svc.id)}
-                      className={`p-2.5 rounded-xl cursor-pointer transition-all flex items-center justify-between gap-2 ${
+                      className={`flex items-center justify-between p-2.5 rounded-xl cursor-pointer transition-all ${
                         isSelected
-                          ? 'bg-orange-50 border border-orange-200 shadow-xs'
-                          : 'hover:bg-white border border-transparent'
+                          ? 'bg-orange-500 text-white shadow-xs font-semibold'
+                          : 'hover:bg-zinc-200/60 text-zinc-800'
                       }`}
                     >
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-zinc-200 bg-white flex items-center justify-center">
+                      <div className="flex items-center gap-2.5 overflow-hidden">
+                        <div className="w-8 h-8 rounded-lg overflow-hidden bg-zinc-200 shrink-0 border border-white/20">
                           {svc.imageUrl ? (
-                            <img
-                              src={svc.imageUrl}
-                              alt={svc.title}
-                              className="w-full h-full object-cover"
-                            />
+                            <img src={svc.imageUrl} alt="" className="w-full h-full object-cover" />
                           ) : (
-                            <ServiceMockup type={svc.svgMockupType} className="w-full h-full p-1" />
+                            <div className="w-full h-full flex items-center justify-center text-[10px] font-bold bg-zinc-800 text-white">
+                              BD
+                            </div>
                           )}
                         </div>
-                        <div className="min-w-0">
-                          <p className="text-xs font-bold text-zinc-900 truncate">{svc.title}</p>
-                          <div className="flex items-center gap-1.5 text-[10px] text-zinc-500">
-                            <span className="font-semibold text-orange-600">{svc.price}</span>
-                            <span>•</span>
-                            <span className="truncate">{svc.category}</span>
+                        <div className="truncate">
+                          <div className="text-xs truncate">{svc.title}</div>
+                          <div className={`text-[10px] ${isSelected ? 'text-orange-100' : 'text-zinc-500'}`}>
+                            {svc.price} · {svc.category}
                           </div>
                         </div>
                       </div>
-                      <span className="text-[10px] text-zinc-400 font-mono shrink-0">
-                        {svc.imageUrl ? '📷 Foto' : '🎨 Vektor'}
-                      </span>
+
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteService(svc.id);
+                        }}
+                        className={`p-1.5 rounded-lg opacity-60 hover:opacity-100 transition-opacity ${
+                          isSelected ? 'text-white hover:bg-orange-600' : 'text-zinc-400 hover:text-rose-600'
+                        }`}
+                        title="Hapus layanan"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
                     </div>
                   );
                 })}
               </div>
             </div>
 
-            {/* Right Editor Form */}
-            <div className="md:col-span-7 flex flex-col h-full overflow-y-auto p-4 sm:p-6 bg-white space-y-5">
-              {currentService ? (
-                <>
-                  <div className="flex items-center justify-between pb-3 border-b border-zinc-100">
-                    <div>
-                      <span className="text-[11px] font-bold text-orange-600 uppercase tracking-wider">
-                        Edit Layanan ID: {currentService.id}
+            {/* Right form editor for active service */}
+            {currentService && (
+              <div className="md:col-span-7 p-4 sm:p-6 overflow-y-auto space-y-5 bg-white">
+                {/* PHOTO UPDATE SECTION */}
+                <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200/80">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-xs font-bold text-zinc-900 uppercase tracking-wider flex items-center gap-1.5">
+                      <ImageIcon className="w-4 h-4 text-orange-600" />
+                      Update Foto Layanan
+                    </span>
+                    {currentService.imageUrl && (
+                      <span className="text-[10px] px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 font-bold">
+                        Menggunakan Foto Khusus
                       </span>
-                      <h3 className="text-base font-extrabold text-zinc-900">
-                        {currentService.title}
-                      </h3>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteService(currentService.id)}
-                      className="flex items-center gap-1 text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50 px-2.5 py-1.5 rounded-lg transition-colors font-medium cursor-pointer"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                      <span>Hapus Layanan</span>
-                    </button>
+                    )}
                   </div>
 
-                  {/* Section Foto Layanan */}
-                  <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200/80 space-y-3">
-                    <label className="block text-xs font-bold text-zinc-900">
-                      Foto Sampel Hasil Cetak / Desain
-                    </label>
-                    <div className="flex flex-col sm:flex-row items-center gap-4">
-                      <div className="w-28 h-28 rounded-2xl border-2 border-dashed border-zinc-300 bg-white flex items-center justify-center overflow-hidden shrink-0 shadow-2xs relative group">
-                        {currentService.imageUrl ? (
-                          <img
-                            src={currentService.imageUrl}
-                            alt="Preview"
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="p-2 w-full h-full flex flex-col items-center justify-center text-zinc-400 text-center">
-                            <ServiceMockup
-                              type={currentService.svgMockupType}
-                              className="w-12 h-12 mb-1"
-                            />
-                            <span className="text-[9px]">Ilustrasi Default</span>
-                          </div>
+                  <div className="flex flex-col sm:flex-row items-center gap-4">
+                    {/* Visual preview */}
+                    <div className="w-32 h-24 rounded-xl overflow-hidden shrink-0 border border-zinc-200 bg-white">
+                      <ServiceMockup service={currentService} className="w-full h-full" isCompact={true} />
+                    </div>
+
+                    <div className="flex-1 space-y-2 w-full">
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        accept="image/*"
+                        onChange={handleImageFileUpload}
+                        className="hidden"
+                      />
+
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-600 hover:bg-orange-500 text-white rounded-lg text-xs font-bold transition-colors cursor-pointer"
+                        >
+                          <Upload className="w-3.5 h-3.5" />
+                          <span>Upload Foto Baru</span>
+                        </button>
+
+                        {currentService.imageUrl && (
+                          <button
+                            type="button"
+                            onClick={handleRemoveImage}
+                            className="px-3 py-1.5 bg-zinc-200 hover:bg-zinc-300 text-zinc-800 rounded-lg text-xs font-medium transition-colors"
+                          >
+                            Pakai Mockup Default
+                          </button>
                         )}
                       </div>
 
-                      <div className="flex-1 space-y-2 w-full">
+                      {/* URL input */}
+                      <div>
                         <input
-                          type="file"
-                          ref={fileInputRef}
-                          onChange={handleImageFileUpload}
-                          accept="image/*"
-                          className="hidden"
+                          type="text"
+                          placeholder="Atau tempel Link URL Foto (https://...)"
+                          value={currentService.imageUrl || ''}
+                          onChange={(e) => handleServiceChange('imageUrl', e.target.value)}
+                          className="w-full px-2.5 py-1.5 bg-white border border-zinc-300 rounded-lg text-xs text-zinc-800 placeholder:text-zinc-400 focus:ring-1 focus:ring-orange-500"
                         />
-                        <div className="flex flex-wrap gap-2">
-                          <button
-                            type="button"
-                            onClick={() => fileInputRef.current?.click()}
-                            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold shadow-xs transition-all cursor-pointer"
-                          >
-                            <Upload className="w-3.5 h-3.5" />
-                            <span>Upload Foto dari Galeri</span>
-                          </button>
-
-                          {currentService.imageUrl && (
-                            <button
-                              type="button"
-                              onClick={handleRemoveImage}
-                              className="px-3 py-2 rounded-xl bg-zinc-200 hover:bg-zinc-300 text-zinc-700 text-xs font-semibold transition-all cursor-pointer"
-                            >
-                              Gunakan Ilustrasi Bawaan
-                            </button>
-                          )}
-                        </div>
-                        <p className="text-[11px] text-zinc-500 leading-normal">
-                          Format JPG / PNG / WEBP maks 3MB. Foto langsung disimpan di memori browser dan tersimpan otomatis.
-                        </p>
                       </div>
                     </div>
                   </div>
-
-                  {/* Form detail */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                    <div className="sm:col-span-2">
-                      <label className="block text-xs font-semibold text-zinc-700 mb-1">
-                        Nama / Judul Layanan
-                      </label>
-                      <input
-                        type="text"
-                        value={currentService.title}
-                        onChange={(e) => handleServiceChange('title', e.target.value)}
-                        className="w-full px-3 py-2 border border-zinc-300 rounded-xl text-xs sm:text-sm text-zinc-900 focus:outline-hidden focus:ring-2 focus:ring-orange-500"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-semibold text-zinc-700 mb-1">
-                        Kategori Layanan
-                      </label>
-                      <select
-                        value={currentService.category}
-                        onChange={(e) => {
-                          const val = e.target.value as ServiceCategory;
-                          handleServiceChange('category', val);
-                          handleServiceChange('categoryLabel', val);
-                        }}
-                        className="w-full px-3 py-2 border border-zinc-300 rounded-xl text-xs sm:text-sm text-zinc-900 bg-white focus:outline-hidden focus:ring-2 focus:ring-orange-500"
-                      >
-                        <option value="Dokumen">Print & Dokumen</option>
-                        <option value="Promosi">Promosi & Bisnis UMKM</option>
-                        <option value="Foto">Foto & Polaroid</option>
-                        <option value="Undangan">Undangan & Acara</option>
-                        <option value="Digital">Jasa Desain & Digital</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-semibold text-zinc-700 mb-1">
-                        Label Harga Katalog
-                      </label>
-                      <input
-                        type="text"
-                        value={currentService.price}
-                        onChange={(e) => handleServiceChange('price', e.target.value)}
-                        placeholder="Mulai Rp 500 / lembar"
-                        className="w-full px-3 py-2 border border-zinc-300 rounded-xl text-xs sm:text-sm text-zinc-900 focus:outline-hidden focus:ring-2 focus:ring-orange-500"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-semibold text-zinc-700 mb-1">
-                        Estimasi Pengerjaan
-                      </label>
-                      <input
-                        type="text"
-                        value={currentService.duration}
-                        onChange={(e) => handleServiceChange('duration', e.target.value)}
-                        placeholder="1-2 jam / 1 hari"
-                        className="w-full px-3 py-2 border border-zinc-300 rounded-xl text-xs sm:text-sm text-zinc-900 focus:outline-hidden focus:ring-2 focus:ring-orange-500"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-semibold text-zinc-700 mb-1">
-                        Minimal Pemesanan
-                      </label>
-                      <input
-                        type="text"
-                        value={currentService.minOrder}
-                        onChange={(e) => handleServiceChange('minOrder', e.target.value)}
-                        placeholder="1 lembar / 1 pcs"
-                        className="w-full px-3 py-2 border border-zinc-300 rounded-xl text-xs sm:text-sm text-zinc-900 focus:outline-hidden focus:ring-2 focus:ring-orange-500"
-                      />
-                    </div>
-
-                    <div className="sm:col-span-2">
-                      <div className="flex items-center justify-between mb-1">
-                        <label className="block text-xs font-semibold text-zinc-700">
-                          Deskripsi Lengkap
-                        </label>
-                        <button
-                          type="button"
-                          onClick={handleGenerateAIDescription}
-                          disabled={isGeneratingAI}
-                          className="flex items-center gap-1 text-[11px] text-orange-600 hover:text-orange-700 font-bold hover:underline cursor-pointer disabled:opacity-50"
-                        >
-                          <Sparkles className="w-3 h-3 text-orange-500" />
-                          <span>{isGeneratingAI ? 'AI Menyusun Konten...' : 'Buat Konten dengan AI (Free)'}</span>
-                        </button>
-                      </div>
-                      <textarea
-                        rows={3}
-                        value={currentService.description}
-                        onChange={(e) => handleServiceChange('description', e.target.value)}
-                        className="w-full px-3 py-2 border border-zinc-300 rounded-xl text-xs sm:text-sm text-zinc-900 focus:outline-hidden focus:ring-2 focus:ring-orange-500"
-                      />
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <div className="py-20 text-center text-zinc-400 text-sm">
-                  Pilih layanan di daftar kiri untuk mulai mengedit.
                 </div>
-              )}
-            </div>
+
+                {/* Form fields */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  <div>
+                    <label className="block text-xs font-semibold text-zinc-700 mb-1">Judul Layanan</label>
+                    <input
+                      type="text"
+                      value={currentService.title}
+                      onChange={(e) => handleServiceChange('title', e.target.value)}
+                      className="w-full px-3 py-2 bg-zinc-50 border border-zinc-300 rounded-xl text-xs sm:text-sm font-semibold text-zinc-900 focus:bg-white focus:ring-2 focus:ring-orange-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-zinc-700 mb-1">Kategori</label>
+                    <select
+                      value={currentService.category}
+                      onChange={(e) => {
+                        const val = e.target.value as ServiceCategory;
+                        handleServiceChange('category', val);
+                        handleServiceChange('categoryLabel', val);
+                      }}
+                      className="w-full px-3 py-2 bg-zinc-50 border border-zinc-300 rounded-xl text-xs sm:text-sm font-semibold text-zinc-900 focus:bg-white focus:ring-2 focus:ring-orange-500"
+                    >
+                      <option value="Dokumen">Dokumen (Print & Fotokopi)</option>
+                      <option value="Promosi">Promosi (Banner, Stiker, Kartu Nama)</option>
+                      <option value="Foto">Foto & Polaroid</option>
+                      <option value="Undangan">Undangan & Acara</option>
+                      <option value="Digital">Digital & Desain</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-zinc-700 mb-1">Harga Tampilan</label>
+                    <input
+                      type="text"
+                      placeholder="Contoh: Mulai Rp 500 / lbr"
+                      value={currentService.price}
+                      onChange={(e) => handleServiceChange('price', e.target.value)}
+                      className="w-full px-3 py-2 bg-zinc-50 border border-zinc-300 rounded-xl text-xs sm:text-sm text-zinc-900 font-bold text-orange-600 focus:bg-white focus:ring-2 focus:ring-orange-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-zinc-700 mb-1">Minimal Order</label>
+                    <input
+                      type="text"
+                      placeholder="Contoh: 1 lembar / 50 pcs"
+                      value={currentService.minOrder}
+                      onChange={(e) => handleServiceChange('minOrder', e.target.value)}
+                      className="w-full px-3 py-2 bg-zinc-50 border border-zinc-300 rounded-xl text-xs sm:text-sm text-zinc-900 focus:bg-white focus:ring-2 focus:ring-orange-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-zinc-700 mb-1">Estimasi Pengerjaan</label>
+                    <input
+                      type="text"
+                      placeholder="Contoh: 10 - 30 menit / 1 - 2 hari"
+                      value={currentService.duration}
+                      onChange={(e) => handleServiceChange('duration', e.target.value)}
+                      className="w-full px-3 py-2 bg-zinc-50 border border-zinc-300 rounded-xl text-xs sm:text-sm text-zinc-900 focus:bg-white focus:ring-2 focus:ring-orange-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-zinc-700 mb-1">Varian Kertas (pisahkan koma)</label>
+                    <input
+                      type="text"
+                      placeholder="Contoh: HVS 70gr, HVS 80gr, Art Paper"
+                      value={(currentService.paperOptions || []).join(', ')}
+                      onChange={(e) =>
+                        handleServiceChange(
+                          'paperOptions',
+                          e.target.value.split(',').map((x) => x.trim()).filter(Boolean)
+                        )
+                      }
+                      className="w-full px-3 py-2 bg-zinc-50 border border-zinc-300 rounded-xl text-xs sm:text-sm text-zinc-900 focus:bg-white focus:ring-2 focus:ring-orange-500"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-xs font-semibold text-zinc-700">Deskripsi Layanan Singkat</label>
+                    <button
+                      type="button"
+                      disabled={isGeneratingAI}
+                      onClick={handleGenerateAIDescription}
+                      className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-orange-50 hover:bg-orange-100 text-orange-700 border border-orange-200 text-[11px] font-bold transition-all cursor-pointer disabled:opacity-50"
+                      title="AI akan otomatis menyusun deskripsi, estimasi harga, waktu dan spesifikasi"
+                    >
+                      <Sparkles className="w-3.5 h-3.5 text-orange-600 animate-pulse" />
+                      <span>{isGeneratingAI ? 'AI Menyusun Konten...' : 'Buat Konten dengan AI (Free)'}</span>
+                    </button>
+                  </div>
+                  <textarea
+                    rows={2}
+                    value={currentService.description}
+                    onChange={(e) => handleServiceChange('description', e.target.value)}
+                    className="w-full px-3 py-2 bg-zinc-50 border border-zinc-300 rounded-xl text-xs sm:text-sm text-zinc-900 focus:bg-white focus:ring-2 focus:ring-orange-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-zinc-700 mb-1">
+                    Spesifikasi Lengkap (1 baris per poin)
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={(currentService.specifications || []).join('\n')}
+                    onChange={(e) =>
+                      handleServiceChange('specifications', e.target.value.split('\n').filter(Boolean))
+                    }
+                    className="w-full px-3 py-2 bg-zinc-50 border border-zinc-300 rounded-xl text-xs sm:text-sm text-zinc-900 focus:bg-white focus:ring-2 focus:ring-orange-500"
+                  />
+                </div>
+              </div>
+            )}
           </div>
         )}
 
-        {/* Tab 2: Profile & Hero */}
+        {/* Tab 2: Studio Profile & Hero Text */}
         {activeTab === 'profile' && (
-          <div className="flex-1 overflow-y-auto p-5 sm:p-7 max-w-3xl space-y-5">
-            <h3 className="text-sm font-bold text-zinc-900 uppercase tracking-wider pb-2 border-b border-zinc-200">
-              Identitas & Kontak Studio
-            </h3>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-zinc-700 mb-1">
-                  Nama Brand Studio
-                </label>
-                <input
-                  type="text"
-                  value={localConfig.brandName}
-                  onChange={(e) =>
-                    setLocalConfig({ ...localConfig, brandName: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-zinc-300 rounded-xl text-xs sm:text-sm text-zinc-900 focus:outline-hidden focus:ring-2 focus:ring-orange-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-zinc-700 mb-1">
-                  Nomor WhatsApp Pemesanan
-                </label>
-                <input
-                  type="text"
-                  value={localConfig.whatsappNumber}
-                  onChange={(e) =>
-                    setLocalConfig({ ...localConfig, whatsappNumber: e.target.value })
-                  }
-                  placeholder="6281234567890"
-                  className="w-full px-3 py-2 border border-zinc-300 rounded-xl text-xs sm:text-sm text-zinc-900 focus:outline-hidden focus:ring-2 focus:ring-orange-500"
-                />
-              </div>
-
-              <div className="sm:col-span-2">
-                <label className="block text-xs font-semibold text-zinc-700 mb-1">
-                  Judul Utama Hero (Header Besar)
-                </label>
-                <input
-                  type="text"
-                  value={localConfig.heroTitle}
-                  onChange={(e) =>
-                    setLocalConfig({ ...localConfig, heroTitle: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-zinc-300 rounded-xl text-xs sm:text-sm text-zinc-900 focus:outline-hidden focus:ring-2 focus:ring-orange-500"
-                />
-              </div>
-
-              <div className="sm:col-span-2">
-                <label className="block text-xs font-semibold text-zinc-700 mb-1">
-                  Sub-Judul Hero
-                </label>
-                <textarea
-                  rows={2}
-                  value={localConfig.heroSubtitle}
-                  onChange={(e) =>
-                    setLocalConfig({ ...localConfig, heroSubtitle: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-zinc-300 rounded-xl text-xs sm:text-sm text-zinc-900 focus:outline-hidden focus:ring-2 focus:ring-orange-500"
-                />
-              </div>
-
-              <div className="sm:col-span-2">
-                <label className="block text-xs font-semibold text-zinc-700 mb-1">
-                  Alamat / Wilayah Layanan Studio
-                </label>
-                <input
-                  type="text"
-                  value={localConfig.address}
-                  onChange={(e) =>
-                    setLocalConfig({ ...localConfig, address: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-zinc-300 rounded-xl text-xs sm:text-sm text-zinc-900 focus:outline-hidden focus:ring-2 focus:ring-orange-500"
-                />
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Tab 3: Backup & Export */}
-        {activeTab === 'export' && (
-          <div className="flex-1 overflow-y-auto p-5 sm:p-7 max-w-3xl space-y-6">
+          <div className="flex-1 p-5 sm:p-7 overflow-y-auto space-y-6">
             <div>
-              <h3 className="text-sm font-bold text-zinc-900 uppercase tracking-wider">
-                Backup & Sinkronisasi Data
+              <h3 className="font-bold text-zinc-900 text-sm sm:text-base mb-1">
+                Teks Header & Hero Halaman Depan
               </h3>
-              <p className="text-xs text-zinc-500 mt-1">
-                Data disimpan di memori browser. Anda bisa mengekspor file cadangan agar data tidak hilang saat membersihkan riwayat browser.
+              <p className="text-xs text-zinc-500 mb-4">
+                Ubah judul besar dan teks sambutan yang muncul pertama kali di website
               </p>
-            </div>
 
-            <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200 space-y-3">
-              <h4 className="text-xs font-bold text-zinc-900">Download Cadangan (Export JSON)</h4>
-              <p className="text-xs text-zinc-500">
-                Simpan semua daftar layanan, harga, foto, dan profil ke satu file JSON.
-              </p>
-              <button
-                type="button"
-                onClick={handleExportJSON}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-bold transition-all cursor-pointer"
-              >
-                <Download className="w-3.5 h-3.5" />
-                <span>Unduh File Cadangan (JSON)</span>
-              </button>
-            </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-zinc-700 mb-1">Nama Brand / Usaha</label>
+                  <input
+                    type="text"
+                    value={localConfig.brandName}
+                    onChange={(e) => setLocalConfig({ ...localConfig, brandName: e.target.value })}
+                    className="w-full px-3 py-2 bg-zinc-50 border border-zinc-300 rounded-xl text-sm font-bold text-zinc-900"
+                  />
+                </div>
 
-            <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200 space-y-3">
-              <h4 className="text-xs font-bold text-zinc-900">Pulihkan Data (Import JSON)</h4>
-              <p className="text-xs text-zinc-500">
-                Pulihkan data dari file cadangan yang telah Anda unduh sebelumnya.
-              </p>
-              <input
-                type="file"
-                ref={jsonInputRef}
-                onChange={handleImportJSON}
-                accept=".json"
-                className="hidden"
-              />
-              <button
-                type="button"
-                onClick={() => jsonInputRef.current?.click()}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold transition-all cursor-pointer"
-              >
-                <Upload className="w-3.5 h-3.5" />
-                <span>Pilih File Backup JSON</span>
-              </button>
+                <div>
+                  <label className="block text-xs font-semibold text-zinc-700 mb-1">Sub-Brand / Tagline Singkat</label>
+                  <input
+                    type="text"
+                    value={localConfig.subBrand}
+                    onChange={(e) => setLocalConfig({ ...localConfig, subBrand: e.target.value })}
+                    className="w-full px-3 py-2 bg-zinc-50 border border-zinc-300 rounded-xl text-sm text-zinc-900"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-semibold text-zinc-700 mb-1">Judul Besar Hero</label>
+                  <input
+                    type="text"
+                    value={localConfig.heroTitle}
+                    onChange={(e) => setLocalConfig({ ...localConfig, heroTitle: e.target.value })}
+                    className="w-full px-3 py-2 bg-zinc-50 border border-zinc-300 rounded-xl text-sm font-extrabold text-zinc-900"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-semibold text-zinc-700 mb-1">Deskripsi Hero</label>
+                  <textarea
+                    rows={2}
+                    value={localConfig.heroSubtitle}
+                    onChange={(e) => setLocalConfig({ ...localConfig, heroSubtitle: e.target.value })}
+                    className="w-full px-3 py-2 bg-zinc-50 border border-zinc-300 rounded-xl text-sm text-zinc-900"
+                  />
+                </div>
+              </div>
             </div>
 
             <div className="pt-4 border-t border-zinc-200">
+              <h3 className="font-bold text-zinc-900 text-sm sm:text-base mb-1">
+                Kontak WhatsApp & Media Sosial
+              </h3>
+              <p className="text-xs text-zinc-500 mb-4">
+                Pesan dari kalkulator otomatis dikirim ke nomor WhatsApp ini
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-zinc-700 mb-1">
+                    Nomor WhatsApp Tujuan (Angka saja, awalan 62)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Contoh: 6285712345678"
+                    value={localConfig.whatsappNumber}
+                    onChange={(e) => setLocalConfig({ ...localConfig, whatsappNumber: e.target.value })}
+                    className="w-full px-3 py-2 bg-zinc-50 border border-zinc-300 rounded-xl text-sm font-mono font-bold text-emerald-700"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-zinc-700 mb-1">
+                    Nomor WhatsApp Tampilan (Format teks)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Contoh: 0857-1234-5678"
+                    value={localConfig.whatsappDisplayNumber}
+                    onChange={(e) =>
+                      setLocalConfig({ ...localConfig, whatsappDisplayNumber: e.target.value })
+                    }
+                    className="w-full px-3 py-2 bg-zinc-50 border border-zinc-300 rounded-xl text-sm font-medium text-zinc-900"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-zinc-700 mb-1">Nama Admin CS</label>
+                  <input
+                    type="text"
+                    value={localConfig.adminName}
+                    onChange={(e) => setLocalConfig({ ...localConfig, adminName: e.target.value })}
+                    className="w-full px-3 py-2 bg-zinc-50 border border-zinc-300 rounded-xl text-sm text-zinc-900"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-zinc-700 mb-1">Email Studio</label>
+                  <input
+                    type="email"
+                    value={localConfig.email}
+                    onChange={(e) => setLocalConfig({ ...localConfig, email: e.target.value })}
+                    className="w-full px-3 py-2 bg-zinc-50 border border-zinc-300 rounded-xl text-sm text-zinc-900"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-zinc-700 mb-1">Instagram (@username)</label>
+                  <input
+                    type="text"
+                    value={localConfig.instagram}
+                    onChange={(e) => setLocalConfig({ ...localConfig, instagram: e.target.value })}
+                    className="w-full px-3 py-2 bg-zinc-50 border border-zinc-300 rounded-xl text-sm text-zinc-900"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-zinc-700 mb-1">TikTok (@username)</label>
+                  <input
+                    type="text"
+                    value={localConfig.tiktok}
+                    onChange={(e) => setLocalConfig({ ...localConfig, tiktok: e.target.value })}
+                    className="w-full px-3 py-2 bg-zinc-50 border border-zinc-300 rounded-xl text-sm text-zinc-900"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-semibold text-zinc-700 mb-1">Alamat Studio / Catatan Pengambilan</label>
+                  <input
+                    type="text"
+                    value={localConfig.address}
+                    onChange={(e) => setLocalConfig({ ...localConfig, address: e.target.value })}
+                    className="w-full px-3 py-2 bg-zinc-50 border border-zinc-300 rounded-xl text-sm text-zinc-900"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Tab 3: GitHub & Vercel Sync */}
+        {activeTab === 'export' && (
+          <div className="flex-1 p-5 sm:p-7 overflow-y-auto space-y-6">
+            <div className="bg-orange-50 border border-orange-200 rounded-2xl p-4 sm:p-5 flex items-start gap-3">
+              <Sparkles className="w-5 h-5 text-orange-600 shrink-0 mt-0.5" />
+              <div>
+                <h4 className="text-sm font-bold text-orange-950">Dukungan Penuh GitHub & Vercel</h4>
+                <p className="text-xs text-orange-800 mt-1 leading-relaxed">
+                  Kode dibuat dengan standar modern Vite + React SPA + TypeScript yang 100% kompatibel untuk di-push ke GitHub dan di-deploy ke Vercel tanpa konfigurasi rumit.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Backup Card */}
+              <div className="p-4 sm:p-5 rounded-2xl border border-zinc-200 bg-white shadow-2xs space-y-3">
+                <div className="flex items-center gap-2 font-bold text-zinc-900 text-sm">
+                  <Download className="w-4 h-4 text-orange-600" />
+                  <span>Download Backup Data (JSON)</span>
+                </div>
+                <p className="text-xs text-zinc-500">
+                  Simpan seluruh data layanan, foto terunggah, dan profil studio ke dalam file JSON di komputer Anda.
+                </p>
+                <button
+                  type="button"
+                  onClick={handleExportJSON}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white font-bold text-xs transition-colors cursor-pointer"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>Download File JSON</span>
+                </button>
+              </div>
+
+              {/* Restore Card */}
+              <div className="p-4 sm:p-5 rounded-2xl border border-zinc-200 bg-white shadow-2xs space-y-3">
+                <div className="flex items-center gap-2 font-bold text-zinc-900 text-sm">
+                  <Upload className="w-4 h-4 text-orange-600" />
+                  <span>Restore Data dari JSON</span>
+                </div>
+                <p className="text-xs text-zinc-500">
+                  Kembalikan atau import data katalog dari file JSON yang pernah Anda download sebelumnya.
+                </p>
+                <input
+                  type="file"
+                  ref={jsonInputRef}
+                  accept=".json"
+                  onChange={handleImportJSON}
+                  className="hidden"
+                />
+                <button
+                  type="button"
+                  onClick={() => jsonInputRef.current?.click()}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-800 font-bold text-xs transition-colors cursor-pointer"
+                >
+                  <Upload className="w-4 h-4" />
+                  <span>Pilih File JSON</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Reset Defaults */}
+            <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200 flex items-center justify-between">
+              <div>
+                <h5 className="text-xs font-bold text-zinc-900">Reset ke Katalog Awal (Default)</h5>
+                <p className="text-[11px] text-zinc-500">Kembalikan 20 layanan dan profil awal seperti di lampiran.</p>
+              </div>
               <button
                 type="button"
                 onClick={() => {
-                  if (confirm('Kembalikan semua layanan dan profil ke pengaturan awal bawaan?')) {
+                  if (confirm('Kembalikan semua layanan dan konfigurasi ke bawaan awal?')) {
                     onResetDefaults();
-                    alert('Data berhasil di-reset ke bawaan awal!');
                     onClose();
                   }
                 }}
-                className="flex items-center gap-1.5 text-xs text-rose-600 hover:text-rose-700 hover:underline cursor-pointer"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-zinc-300 text-zinc-700 hover:bg-zinc-200 text-xs font-semibold transition-colors"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
-                <span>Reset ke Pengaturan Awal (Default Pabrik)</span>
+                <span>Reset Default</span>
               </button>
             </div>
           </div>
