@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Service, StudioConfig, ServiceCategory } from './types.ts';
 import { DEFAULT_SERVICES, DEFAULT_CONFIG } from './data/defaultData.ts';
-import { Navbar } from './components /Navbar.tsx';
-import { ServiceCard } from './components /ServiceCard.tsx';
-import { WhatsAppCalculator } from './components /WhatsAppCalculator.tsx';
-import { ServiceDetailModal } from './components /ServiceDetailModal.tsx';
-import { ServicePoints } from './components /ServicePoints.tsx';
-import { CMSModal } from './components /CMSModal.tsx';
-import { AIAssistantModal } from './components /AIAssistantModal.tsx';
-import { Footer } from './components /Footer.tsx';
+import { Navbar } from './components/Navbar.tsx';
+import { ServiceCard } from './components/ServiceCard.tsx';
+import { WhatsAppCalculator } from './components/WhatsAppCalculator.tsx';
+import { ServiceDetailModal } from './components/ServiceDetailModal.tsx';
+import { ServicePoints } from './components/ServicePoints.tsx';
+import { CMSModal } from './components/CMSModal.tsx';
+import { AIAssistantModal } from './components/AIAssistantModal.tsx';
+import { Footer } from './components/Footer.tsx';
 import {
   Search,
   Settings,
@@ -27,7 +27,12 @@ export default function App() {
   const [services, setServices] = useState<Service[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_SERVICES);
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      }
     } catch (e) {
       console.error('Failed to parse saved services', e);
     }
@@ -37,7 +42,12 @@ export default function App() {
   const [studioConfig, setStudioConfig] = useState<StudioConfig>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_CONFIG);
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && typeof parsed === 'object' && parsed.whatsappNumber) {
+          return { ...DEFAULT_CONFIG, ...parsed };
+        }
+      }
     } catch (e) {
       console.error('Failed to parse saved config', e);
     }
@@ -488,7 +498,7 @@ export default function App() {
 
         {/* Floating WhatsApp Bubble */}
         <a
-          href={`https://wa.me/${studioConfig.whatsappNumber.replace(/[^0-9]/g, '')}?text=Halo%20${encodeURIComponent(studioConfig.brandName)},%20saya%20ingin%20tanya-tanya%20layanan%20cetak.`}
+          href={`https://wa.me/${(studioConfig?.whatsappNumber || '6285712345678').replace(/[^0-9]/g, '')}?text=Halo%20${encodeURIComponent(studioConfig?.brandName || 'Bikyn Desain')},%20saya%20ingin%20tanya-tanya%20layanan%20cetak.`}
           target="_blank"
           rel="noreferrer"
           className="flex items-center gap-2 px-3.5 py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white shadow-xl hover:shadow-2xl transition-all hover:scale-105 cursor-pointer font-bold text-xs sm:text-sm"
