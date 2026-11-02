@@ -12,6 +12,7 @@ interface State {
   error: Error | null;
 }
 
+// Error Boundary: Mencegah layar putih dan menyediakan tombol reset otomatis
 class ErrorBoundary extends Component<Props, State> {
   public state: State = {
     hasError: false,
@@ -51,12 +52,6 @@ class ErrorBoundary extends Component<Props, State> {
               Ditemukan data cache lama atau kendala memori browser. Klik tombol di bawah untuk membersihkan data dan memuat ulang website secara otomatis.
             </p>
 
-            {this.state.error && (
-              <div className="mb-6 p-3 rounded-xl bg-zinc-950/80 border border-zinc-700/60 text-left font-mono text-xs text-rose-400 overflow-x-auto max-h-32">
-                {this.state.error.toString()}
-              </div>
-            )}
-
             <button
               type="button"
               onClick={this.handleReset}
@@ -78,4 +73,3 @@ createRoot(document.getElementById('root')!).render(
     <App />
   </ErrorBoundary>
 );
-
